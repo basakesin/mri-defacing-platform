@@ -1,12 +1,9 @@
-# defacers/__init__.py
 from .base import Defacer
 
 from . import pydeface as pydeface_mod
 from . import quickshear as quickshear_mod
 from . import deepdefacer as deepdefacer_mod
 from . import mri_deface as mri_deface_mod
-from . import anonymi as anonymi_mod
-
 
 DEFACERS = {
     "pydeface": Defacer(
@@ -36,12 +33,5 @@ DEFACERS = {
         description="MRI Deface - FreeSurfer-based approach",
         is_available=mri_deface_mod.is_available,
         run=mri_deface_mod.run,
-    ),
-    "anonymi": Defacer(
-        key="anonymi",
-        label="AnonyMI",
-        description="AnonyMI - Advanced anonymization technique",
-        is_available=anonymi_mod.is_available,
-        run=anonymi_mod.run,
     ),
 }
