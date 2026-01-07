@@ -1,0 +1,7 @@
+Flask>=2.2
+flask-cors>=4.0
+pydeface>=2.0.2
+anonymi
+numpy
+scipy
+nibabel

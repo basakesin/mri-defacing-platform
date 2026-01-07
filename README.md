@@ -1,2 +1,1 @@
-# mri-defacing-platform
-A unified interface for MRI anonymization
+MRI Defacing Platform is a unified web-based interface that brings together multiple state-of-the-art MRI defacing and anonymization tools into a single, easy-to-use system for neuroimaging researchers and clinicians.

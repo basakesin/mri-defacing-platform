@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MR Defacing Tool – Secure Neuroimaging Anonymization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Seconda curely remove facial information from MR images using established defacing pipelines. Local, privacy-first neuroimaging anonymization."
+    />
+    <meta name="author" content="MR Defacing Tool" />
+
+    <!-- Favicon (optional: change href to your icon) -->
+    <link rel="icon" type="image/png" href="simpleIcon.png" />
+
+    <style>
+      :root {
+        --bg: #020617;
+        --bg-glow: #0b1120;
+        --card-bg: rgba(15, 23, 42, 0.9);
+        --border: rgba(148, 163, 184, 0.35);
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, 0.15);
+        --text-main: #e5e7eb;
+        --text-muted: #9ca3af;
+        --radius-xl: 18px;
+        --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.9);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        color: var(--text-main);
+        background:
+          radial-gradient(circle at 0% 0%, #1f2937 0, transparent 55%),
+          radial-gradient(circle at 100% 0%, #0f172a 0, transparent 55%),
+          radial-gradient(circle at 50% 120%, #0369a1 0, transparent 60%),
+          var(--bg);
+        background-attachment: fixed;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 960px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: 28px;
+        align-items: stretch;
+      }
+
+      @media (max-width: 860px) {
+        .shell {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      /* LEFT: Brand / text */
+
+      .brand {
+        padding: 10px 10px 10px 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.75);
+        font-size: 12px;
+        color: var(--text-muted);
+        backdrop-filter: blur(18px);
+      }
+
+      .badge-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+      }
+
+      h1 {
+        margin: 18px 0 10px;
+        font-size: 34px;
+        line-height: 1.15;
+        letter-spacing: -0.04em;
+      }
+
+      .subtitle {
+        font-size: 15px;
+        color: var(--text-muted);
+        max-width: 520px;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+      }
+
+      .chip {
+        font-size: 11px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: rgba(15, 23, 42, 0.7);
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .chip::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 24px;
+        font-size: 12px;
+        color: var(--text-muted);
+        opacity: 0.9;
+      }
+
+      .meta-label {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      /* RIGHT: Card */
+
+      .card-wrap {
+        position: relative;
+      }
+
+      .card-glow {
+        position: absolute;
+        inset: -15%;
+        background:
+          radial-gradient(circle at 10% -10%, rgba(56, 189, 248, 0.22), transparent 60%),
+          radial-gradient(circle at 90% 110%, rgba(14, 165, 233, 0.18), transparent 65%);
+        opacity: 0.7;
+        filter: blur(18px);
+        z-index: 0;
+      }
+
+      .card {
+        position: relative;
+        z-index: 1;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border);
+        background: radial-gradient(circle at top left, #0b1120, #020617 55%, #020617 100%);
+        box-shadow: var(--shadow-soft);
+        padding: 20px 20px 18px;
+        backdrop-filter: blur(24px);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .card-title {
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .card-tag {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        color: var(--text-muted);
+        background: rgba(15, 23, 42, 0.7);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .field-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .field-label span:first-child {
+        color: var(--text-main);
+        font-weight: 500;
+      }
+
+      .hint {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      input[type="file"],
+      select {
+        font-size: 13px;
+        border-radius: 12px;
+        border: 1px solid rgba(30, 64, 175, 0.6);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text-main);
+        padding: 9px 10px;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.16s ease, box-shadow 0.16s ease,
+          background 0.16s ease, transform 0.08s ease;
+      }
+
+      input[type="file"]::file-selector-button {
+        border: 1px dashed rgba(148, 163, 184, 0.7);
+        margin-right: 10px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      input[type="file"]:hover,
+      select:hover {
+        border-color: var(--accent);
+        background: rgba(15, 23, 42, 0.95);
+      }
+
+      input[type="file"]:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent-soft);
+        transform: translateY(-0.5px);
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 6px;
+      }
+
+      .primary-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+        color: #020617;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .primary-btn::after {
+        content: "↗";
+        font-size: 11px;
+      }
+
+      .primary-btn:hover {
+        filter: brightness(1.07);
+        transform: translateY(-0.6px);
+      }
+
+      .status-text {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: right;
+      }
+
+      .card-footer {
+        margin-top: 10px;
+        font-size: 11px;
+        color: var(--text-muted);
+        border-radius: 12px;
+        padding: 8px 10px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px dashed rgba(148, 163, 184, 0.35);
+      }
+
+      .card-footer strong {
+        color: var(--text-main);
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="shell">
+      <!-- Left side: brand / text -->
+      <section class="brand">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Local &amp; secure MR defacing
+        </div>
+
+        <h1>MR Defacing Tool</h1>
+
+        <p class="subtitle">
+          A privacy-first interface for removing facial structures from MR
+          images. Designed for research institutions and clinical pipelines that
+          need strict control over neuroimaging data.
+        </p>
+
+        <div class="chips">
+          <div class="chip">FSL · FreeSurfer · Deep models</div>
+          <div class="chip">NIfTI &amp; DICOM compatible</div>
+          <div class="chip">On-premise processing</div>
+          <div class="chip">Built for reproducible workflows</div>
+        </div>
+
+        <div class="meta-row">
+          <div>
+            <div class="meta-label">Focus</div>
+            Secure neuroimaging anonymization
+          </div>
+          <div>
+            <div class="meta-label">Data residency</div>
+            Runs entirely on your own server
+          </div>
+        </div>
+      </section>
+
+      <!-- Right side: glassmorphism card -->
+      <section class="card-wrap">
+        <div class="card-glow"></div>
+
+        <div class="card">
+          <header class="card-header">
+            <div class="card-title">Run a defacing job</div>
+            <div class="card-tag">Web 3.0 native UI</div>
+          </header>
+
+          <form action="/deface" method="post" enctype="multipart/form-data">
+            <div class="field">
+              <label class="field-label">
+                <span>MR image file</span>
+                <span>NIfTI (.nii / .nii.gz) or DICOM</span>
+              </label>
+              <input
+                type="file"
+                name="file"
+                accept=".nii,.nii.gz,.dcm,.zip,.tar,.tar.gz"
+                required
+              />
+              <div class="hint">
+                For multi-slice DICOM series, you may upload a zipped folder.
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                <span>Defacing method</span>
+                <span>Installed on your backend</span>
+              </label>
+              <select name="method" required>
+                <option value="pydeface">PyDeface (FSL-based)</option>
+                <option value="quickshear">Quickshear</option>
+                <option value="deepdefacer">DeepDefacer (AI)</option>
+                <option value="mri_deface">MRI Deface (FreeSurfer)</option>
+                <option value="anonymi">AnonyMI</option>
+              </select>
+              <div class="hint">
+                The selected tool must be available in the server environment
+                (e.g. <code>$PATH</code>).
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary-btn" type="submit">
+                Run defacing
+              </button>
+              <div class="status-text">
+                Output will be returned as a downloadable file from your
+                backend.
+              </div>
+            </div>
+          </form>
+
+          <div class="card-footer">
+            <strong>Privacy notice:</strong>This interface does not send data to
+            third-party services. All processing happens inside your controlled
+            infrastructure.
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
