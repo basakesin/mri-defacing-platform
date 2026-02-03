@@ -63,3 +63,53 @@ conda create -n mri-deface python=3.10
 conda activate mri-deface
 
 ```
+
+## 🧠 Installing FSL (Official Method)
+
+For most users, the easiest and recommended installation is via FSL’s official `getfsl.sh` script.
+
+---
+
+### Step 1 — Open a terminal
+
+- **Linux:** Open *Terminal* from the system menu  
+- **macOS:** `Applications → Utilities → Terminal`  
+- **Windows:** Open your WSL distribution (e.g., Ubuntu)
+
+---
+
+### Step 2 — Run the installer
+
+```bash
+
+curl -Ls https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/releases/getfsl.sh | sh -s
+```
+Alternatively, if you downloaded the script manually:
+```bash
+sh ~/Downloads/getfsl.sh
+```
+
+### Step 3 — Restart the terminal
+
+Close and reopen your terminal window after the installation completes.
+
+### Step 4 — Verify installation
+```bash
+fslmaths -version
+```
+
+Activate environment:
+
+```bash
+conda activate mri-deface
+```
+
+Install Requirements:
+```bash
+pip install -r requirements.txt
+```
+Start server:
+
+```bash
+python app.py
+```
