@@ -15,4 +15,7 @@ def run(input_path: Path, output_path: Path) -> None:
         "--input_file", str(input_path),
         "--defaced_output_path", str(output_path),
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    result = subprocess.run(cmd, capture_output=True)
+    if result.returncode != 0:
+        stderr = result.stderr.decode(errors="replace").strip()
+        raise RuntimeError(f"deepdefacer failed (exit {result.returncode}): {stderr}")
